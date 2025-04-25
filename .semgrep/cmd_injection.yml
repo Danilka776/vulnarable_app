@@ -1,7 +1,13 @@
+# .semgrep/command-injection-python.yml
 rules:
-- id: command-injection-os-system
-  message: |
-    Использование os.system() может привести к исполнению произвольных команд.
-  languages: [python]
-  pattern: |
-    os.system($CMD)
+  - id: command-injection-os-system
+    message: >
+      Использование os.system() может привести к выполнению произвольных
+      команд. Убедитесь, что аргумент формируется из доверенных данных.
+    languages: [python]
+    severity: ERROR          # INFO | WARNING | ERROR
+    pattern: |
+      os.system($CMD)
+    metadata:
+      cwe: "CWE-78"
+      confidence: HIGH
