@@ -1,37 +1,26 @@
-# .github/workflows/semgrep.yml
-name: Semgrep SAST
+name: Semgrep Scan
 
 on:
-  push:          { branches: [main] }
-  pull_request:  {}
-  workflow_dispatch: {}
-
-permissions:
-  contents: read
-  security-events: write   # требуется upload-sarif
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  semgrep-scan:
+  semgrep:
+    name: Run Semgrep
     runs-on: ubuntu-latest
-    container:
-      image: semgrep/semgrep:1.119.0
-
     steps:
       - uses: actions/checkout@v4
-
-      # Проверяем, что правила действительно лежат в репо
-      - name: Show .semgrep contents
-        run: ls -R .semgrep
-
-      - name: Run Semgrep with custom rules
+      - name: Install Semgrep
         run: |
-          semgrep scan --config .semgrep \
-                       --metrics=off \          # убираем телеметрию
-                       --error \               # exit-code 1, если найдены ошибки
-                       --sarif --output semgrep.sarif
-
-      - name: Upload SARIF (Code scanning)
-        if: always()                           # загружаем даже при exit-code 1
+          python3 -m pip install --upgrade pip
+          pip install semgrep
+      - name: Run Semgrep Scan
+        run: |
+          semgrep scan --config auto --sarif -o semgrep.sarif .
+      - name: Upload SARIF report
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif

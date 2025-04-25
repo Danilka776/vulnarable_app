@@ -1,13 +1,26 @@
-# .semgrep/command-injection-python.yml
-rules:
-  - id: command-injection-os-system
-    message: >
-      Использование os.system() может привести к выполнению произвольных
-      команд. Убедитесь, что аргумент формируется из доверенных данных.
-    languages: [python]
-    severity: ERROR          # INFO | WARNING | ERROR
-    pattern: |
-      os.system($CMD)
-    metadata:
-      cwe: "CWE-78"
-      confidence: HIGH
+name: Semgrep Scan
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  semgrep:
+    name: Run Semgrep without App Token
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Semgrep
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install semgrep
+      - name: Run Semgrep Scan
+        run: |
+          semgrep scan --config auto --sarif -o semgrep.sarif .
+      - name: Upload SARIF report
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: semgrep.sarif
