@@ -1,0 +1,7 @@
+rules:
+- id: command-injection-os-system
+  message: |
+    Использование os.system() может привести к исполнению произвольных команд.
+  languages: [python]
+  pattern: |
+    os.system($CMD)

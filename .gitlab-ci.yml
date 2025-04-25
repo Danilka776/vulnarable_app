@@ -1,0 +1,19 @@
+stages:
+  - test
+
+variables:
+  SEMGREP_RULES: "semgrep_rules"
+
+semgrep-scan:
+  stage: test
+  image: returntocorp/semgrep:1.73.2
+  script:
+    - semgrep scan --config "$SEMGREP_RULES" \
+                   --json --output gl-sast-report.json
+    - semgrep scan --config "$SEMGREP_RULES" --error
+  artifacts:
+    paths:
+      - gl-sast-report.json
+    reports:
+      sast: gl-sast-report.json
+  allow_failure: false
